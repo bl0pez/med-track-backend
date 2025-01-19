@@ -1,17 +1,51 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
+import { Hasher } from 'src/interfaces';
+import { BcryptPlugin } from 'src/plugins/bcrypt.plugin';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-    private readonly logger = new Logger(PrismaService.name);
+  private hasher: Hasher;
+  private readonly logger = new Logger(PrismaService.name);
 
-    async onModuleInit() {
-        await this.$connect();
-        this.logger.log('Connected to the database');
+  constructor() {
+    super();
+    this.hasher = new BcryptPlugin();
+  }
 
-        const users = await this.user.findMany();
+  async onModuleInit() {
+    await this.$connect();
+    this.logger.log('Connected to the database');
 
-        if (users.length === 0) {}
+    const users = await this.user.findMany();
 
+    if (!users.length) {
+      const users = [
+        {
+          email: 'test@gmail.com',
+          password: this.hasher.hash('123456'),
+          name: 'test',
+          roles: [Role.MAINTENANCE],
+        },
+        {
+          email: 'admin@gmail.com',
+          password: this.hasher.hash('123456'),
+          name: 'admin',
+          roles: [Role.ADMIN],
+        },
+        {
+          email: 'user@gmail.com',
+          password: this.hasher.hash('123456'),
+          name: 'user',
+          roles: [Role.USER],
+        },
+      ];
+
+      for (const user of users) {
+        await this.user.create({ data: user });
+      }
+
+      this.logger.log('Created default users');
     }
+  }
 }
