@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+  MAINTENANCE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  roles     Role[]
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Patient {
+  id        Int           @id @default(autoincrement())
+  name      String
+  rut       String
+  status    PatientStatus
+  tanks     Tank[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Service {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tanks     Tank[]
+}
+
+model External {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Tank      Tank[]
+}
+
+enum TankCapacity {
+  SIX_M2
+  TEN_M2
+  THREE_M3
+}
+
+enum TankStatus {
+  DELIVERED
+  RETURNED
+  RECHARGE
+}
+
+enum RequestType {
+  PATIENT
+  SERVICE
+  EXTERNAL
+}
+
+model Tank {
+  id          Int          @id @default(autoincrement())
+  number_tank String
+  RequestType RequestType
+  capacity    TankCapacity
+  status      TankStatus
+  patientId   Int?
+  serviceId   Int?
+  externalId  Int?
+
+  deliveredAt DateTime
+  returnedAt  DateTime?
+
+  patient  Patient?  @relation(fields: [patientId], references: [id])
+  service  Service?  @relation(fields: [serviceId], references: [id])
+  external External? @relation(fields: [externalId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId], name: "patientId")
+  @@index([serviceId], name: "serviceId")
+  @@index([externalId], name: "externalId")
+  @@index([number_tank], name: "number_tank")
+}
