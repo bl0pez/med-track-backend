@@ -33,8 +33,17 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+
+    const [users, total] = await Promise.all([
+      this.prismaService.user.findMany(),
+      this.prismaService.user.count(),
+    ]);
+
+    return {
+      users,
+      total,
+    }; 
   }
 
   findOne(id: number) {
