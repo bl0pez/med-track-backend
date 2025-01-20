@@ -1,14 +1,14 @@
 export interface JwtPayload {
-    id: string;
+  id: number;
 }
-  
+
 export enum Role {
-    ADMIN,
-    USER,
-    MAINTENANCE,
+  ADMIN,
+  USER,
+  MAINTENANCE,
 }
 
 export interface Hasher {
-    hash(data: string, saltRounds?: number): string;
-    compare(data: string, encrypted: string): Promise<boolean>;
+  hash(data: string, saltRounds?: number): string;
+  compare(data: string, encrypted: string): Promise<boolean>;
 }

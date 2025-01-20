@@ -11,14 +11,15 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [
     UserModule,
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
       secret: envs.jwtSecret,
       signOptions: { expiresIn: envs.jwtExpiresIn },
-    })
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
+  exports: [JwtStrategy, PassportModule, JwtModule],
 })
 export class AuthModule {}

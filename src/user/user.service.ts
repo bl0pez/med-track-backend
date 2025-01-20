@@ -7,7 +7,6 @@ import { BcryptPlugin } from 'src/plugins/bcrypt.plugin';
 
 @Injectable()
 export class UserService {
-
   private hasher: Hasher;
 
   constructor(private readonly prismaService: PrismaService) {
@@ -29,12 +28,11 @@ export class UserService {
         email: createUserDto.email,
         password: hashedPassword,
         roles: createUserDto.roles,
-      }
+      },
     });
   }
 
   async findAll() {
-
     const [users, total] = await Promise.all([
       this.prismaService.user.findMany(),
       this.prismaService.user.count(),
@@ -43,7 +41,7 @@ export class UserService {
     return {
       users,
       total,
-    }; 
+    };
   }
 
   findOne(id: number) {
@@ -63,7 +61,7 @@ export class UserService {
       where: {
         email: email,
       },
-    })
+    });
 
     if (!user) {
       return null;
@@ -77,7 +75,7 @@ export class UserService {
       where: {
         id: id,
       },
-    })
+    });
 
     if (!user) {
       return null;
@@ -85,5 +83,4 @@ export class UserService {
 
     return user;
   }
-
 }

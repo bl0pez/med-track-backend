@@ -28,14 +28,14 @@ export class AuthService {
 
     return {
       user,
-      token: this.getJwtToken({ id: String(user.id) }),
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 
   async refreshToken(user: User) {
     return {
       user,
-      token: this.getJwtToken({ id: String(user.id) }),
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 

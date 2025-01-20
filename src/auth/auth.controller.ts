@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Auth } from './decorators/auth.decorator';
 import { GetUser } from './decorators/get-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -15,7 +16,7 @@ export class AuthController {
 
   @Get('refresh-token')
   @Auth()
-  refreshToken(@GetUser() user) {
+  refreshToken(@GetUser() user: User) {
     return this.authService.refreshToken(user);
   }
 }
