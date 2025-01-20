@@ -28,10 +28,14 @@ export class PatientService {
     });
 
     const size = await this.prismaService.patient.count({
-      //   where: {
-      //     id: query?.id,
-      //     status: query?.status,
-      //   },
+      where: {
+        AND: [
+          { id: patientId },
+          { name: { contains: query?.search, mode: 'insensitive' } },
+          { rut: { contains: query?.search, mode: 'insensitive' } },
+        ],
+        status: query?.status,
+      },
     });
 
     return {
