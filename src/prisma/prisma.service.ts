@@ -47,5 +47,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
       this.logger.log('Created default users');
     }
+
+    const systemMetrics = await this.systemMetrics.findMany();
+
+    if (!systemMetrics.length) {
+      await this.systemMetrics.create({
+        data: {}
+      });
+
+      this.logger.log('Created default system metrics');
+    }
+
   }
 }
