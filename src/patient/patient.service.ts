@@ -1,9 +1,14 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { PatientStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { findPatientsDto } from './dto/find-patients.dto';
 import { createPagination } from 'src/helpers/createPagination';
+import { FindOneByIdDto } from './dto/find-one-by-id.dto';
 
 @Injectable()
 export class PatientService {
@@ -74,6 +79,20 @@ export class PatientService {
 
     if (!patient) {
       return null;
+    }
+
+    return patient;
+  }
+
+  async findOneById({ id }: FindOneByIdDto) {
+    const patient = await this.prismaService.patient.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!patient) {
+      throw new BadRequestException('Paciente no encontrado');
     }
 
     return patient;
