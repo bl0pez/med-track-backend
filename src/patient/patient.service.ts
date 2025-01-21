@@ -9,10 +9,14 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { findPatientsDto } from './dto/find-patients.dto';
 import { createPagination } from 'src/helpers/createPagination';
 import { FindOneByIdDto } from './dto/find-one-by-id.dto';
+import { SystemMetricsService } from 'src/system-metrics/system-metrics.service';
 
 @Injectable()
 export class PatientService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly systemMetricsService: SystemMetricsService,
+  ) {}
 
   async findAll(query: findPatientsDto) {
     const patientId = isNaN(Number(query?.search))
@@ -60,13 +64,17 @@ export class PatientService {
       throw new ConflictException('Paciente ya registrado');
     }
 
-    return this.prismaService.patient.create({
+    const newPatient = await this.prismaService.patient.create({
       data: {
         rut: createPatientDto.rut,
         name: createPatientDto.name,
         status: PatientStatus.ACTIVE,
       },
     });
+
+    await this.patientMetrics(PatientStatus.ACTIVE);
+
+    return newPatient;
   }
 
   async findOneByRut(rut: string) {
@@ -98,5 +106,13 @@ export class PatientService {
     }
 
     return patient;
+  }
+
+  private async patientMetrics(status: PatientStatus) {
+    if (status === PatientStatus.ACTIVE) {
+      return this.systemMetricsService.incrementPatientsActive();
+    }
+
+    return this.systemMetricsService.incrementPatientsInactive();
   }
 }
