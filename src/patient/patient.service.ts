@@ -32,7 +32,7 @@ export class PatientService {
       },
     });
 
-    const size = await this.prismaService.patient.count({
+    const totalRows = await this.prismaService.patient.count({
       where: {
         AND: [
           { id: patientId },
@@ -46,10 +46,9 @@ export class PatientService {
     return {
       patients: patients,
       metadata: createPagination({
-        page: query.page || 1,
-        take: query.limit,
-        size: size,
-        count: patients.length,
+        page: query.page,
+        rowsPerPage: query.limit,
+        count: totalRows,
       }),
     };
   }

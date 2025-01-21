@@ -53,7 +53,7 @@ export class TankService {
       }
     });
 
-    const size = await this.prismaService.tank.count({
+    const rowsPerPage = await this.prismaService.tank.count({
       where: {
         AND: [
           { number_tank: { contains: paginationDto?.search, mode: 'insensitive' } },
@@ -64,10 +64,9 @@ export class TankService {
     return {
       tanks: tanks,
       metadata: createPagination({
-        page: paginationDto.page || 1,
-        take: paginationDto.limit,
-        size: size,
-        count: tanks.length,
+        page: paginationDto.page,
+        rowsPerPage: paginationDto.limit,
+        count: rowsPerPage,
       })
     };
 
@@ -95,7 +94,7 @@ export class TankService {
       }
     });
 
-    const size = await this.prismaService.tank.count({
+    const totalRows = await this.prismaService.tank.count({
       where: {
         OR: [
           { patient_id: patient_id },
@@ -111,11 +110,10 @@ export class TankService {
     return {
       tanks: tanks,
       metadata: createPagination({
-        page: tankSearchDto.page || 1,
-        take: tankSearchDto.limit,
-        size: size,
-        count: tanks.length,
-      })
+        page: tankSearchDto.page,
+        rowsPerPage: tankSearchDto.limit,
+        count: totalRows,
+    })
     }
   }
 

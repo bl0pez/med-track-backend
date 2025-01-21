@@ -1,19 +1,18 @@
 interface Props {
-    page: number;
-    take: number;
+    page: number;       
+    rowsPerPage: number;
     count: number;
-    size: number;
 }
 
-export const createPagination = ({ page, take, count, size }: Props) => {
-    const totalPages = Math.ceil(size / take);
+export const createPagination = ({ page = 0, rowsPerPage, count }: Props) => {
+    const totalPages = Math.ceil(count / rowsPerPage);
 
     return {
         totalPages: totalPages || 1,
         currentPage: page,
-        size: size,
-        count: count,
-        nextPage: totalPages > page ? page + 1 : null,
-        prevPage: page - 1 > 0 ? page - 1 : null,
+        rowsPerPage,
+        totalRows: count,
+        nextPage: totalPages > page + 1 ? page + 1 : null,
+        prevPage: page > 0 ? page - 1 : null,
     };
 };
