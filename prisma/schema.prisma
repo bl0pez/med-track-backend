@@ -81,25 +81,25 @@ enum RequestType {
 model Tank {
   id          Int          @id @default(autoincrement())
   number_tank String
-  RequestType RequestType
+  request_type RequestType
   capacity    TankCapacity
   status      TankStatus
-  patientId   Int?
-  serviceId   Int?
-  externalId  Int?
+  patient_id   Int?
+  service_id   Int?
+  external_id  Int?
 
   deliveredAt DateTime
   returnedAt  DateTime?
 
-  patient  Patient?  @relation(fields: [patientId], references: [id])
-  service  Service?  @relation(fields: [serviceId], references: [id])
-  external External? @relation(fields: [externalId], references: [id])
+  patient  Patient?  @relation(fields: [patient_id], references: [id])
+  service  Service?  @relation(fields: [service_id], references: [id])
+  external External? @relation(fields: [external_id], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([patientId], name: "patientId")
-  @@index([serviceId], name: "serviceId")
-  @@index([externalId], name: "externalId")
+  @@index([patient_id], name: "patient_id")
+  @@index([service_id], name: "service_id")
+  @@index([external_id], name: "external_id")
   @@index([number_tank], name: "number_tank")
 }

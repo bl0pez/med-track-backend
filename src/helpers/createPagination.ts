@@ -9,7 +9,7 @@ export const createPagination = ({ page, take, count, size }: Props) => {
     const totalPages = Math.ceil(size / take);
 
     return {
-        totalPages: totalPages,
+        totalPages: totalPages || 1,
         currentPage: page,
         size: size,
         count: count,

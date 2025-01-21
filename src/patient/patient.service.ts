@@ -89,6 +89,9 @@ export class PatientService {
       where: {
         id: id,
       },
+      include: {
+        tanks: true,
+      }
     });
 
     if (!patient) {
