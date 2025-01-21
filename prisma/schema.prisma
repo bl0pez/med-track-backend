@@ -78,6 +78,21 @@ enum RequestType {
   EXTERNAL
 }
 
+model SystemMetrics {
+  id       Int      @id @default(autoincrement())
+
+  total_patients_active Int @default(0)
+  total_patients_inactive Int @default(0)
+
+  total_tanks_delivered Int @default(0)
+  total_tanks_returned Int @default(0)
+  total_tanks_recharge Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
 model Tank {
   id          Int          @id @default(autoincrement())
   number_tank String
