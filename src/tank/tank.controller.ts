@@ -19,14 +19,19 @@ export class TankController {
     return this.tankService.findAll(paginationDto);
   }
 
+  @Get('code/:code')
+  findByCode(@Param('code') code: string) {
+    return this.tankService.findOneByCode(code);
+  }
+
   @Get('search')
   search(@Query() tankSearchDto: TankSearchDto) {
     return this.tankService.searchTanks(tankSearchDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tankService.findOne(+id);
+  @Patch(':id/close')
+  close(@Param('id') id: string) {
+    return this.tankService.close(+id);
   }
 
   @Patch(':id')

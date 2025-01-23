@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { CreateTankDto } from './dto/create-tank.dto';
 import { UpdateTankDto } from './dto/update-tank.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { $Enums, Prisma } from '@prisma/client';
+import { $Enums, Prisma, TankCapacity } from '@prisma/client';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { createPagination } from 'src/helpers/createPagination';
 import { TankSearchDto } from './dto/tank-search.dto';
@@ -72,6 +72,27 @@ export class TankService {
 
   }
 
+  async findOneByCode(code: string) {
+    const tank = await this.prismaService.tank.findFirst({
+      where: {
+        number_tank: code,
+        capacity: TankCapacity.SIX_M2,
+        returnedAt: null
+      },
+      include: {
+        patient: true,
+        service: true
+      }
+    });
+
+    if (!tank) {
+      throw new BadRequestException("Tanque no encontrado");
+    }
+
+    return tank;
+
+  }
+
   async searchTanks(tankSearchDto: TankSearchDto) {
     const { patient_id, external_id, service_id } = tankSearchDto;
 
@@ -117,8 +138,40 @@ export class TankService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tank`;
+  async close(id: number) {
+    const tank = await this.findOneById(id);
+
+    if (tank.status === $Enums.TankStatus.RETURNED) {
+      throw new BadRequestException("Tanque ya ha sido devuelto");
+    }
+
+    try {
+      return await this.prismaService.tank.update({
+        where: {
+          id: id
+        },
+        data: {
+          status: $Enums.TankStatus.RETURNED,
+          returnedAt: new Date()
+        }
+      });
+    } catch (error) {
+      this.customError(error);
+    }
+  }
+
+  async findOneById(id: number) {
+    const tank = await this.prismaService.tank.findFirst({
+      where: {
+        id: id
+      }
+    });
+
+    if (!tank) {
+      throw new BadRequestException("Tanque no encontrado");
+    }
+
+    return tank;
   }
 
   update(id: number, updateTankDto: UpdateTankDto) {
