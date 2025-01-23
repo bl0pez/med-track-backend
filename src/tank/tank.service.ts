@@ -6,12 +6,14 @@ import { $Enums, Prisma, TankCapacity } from '@prisma/client';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { createPagination } from 'src/helpers/createPagination';
 import { TankSearchDto } from './dto/tank-search.dto';
+import { SystemMetricsService } from 'src/system-metrics/system-metrics.service';
 
 @Injectable()
 export class TankService {
 
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly systemMetricsService: SystemMetricsService
   ) {}
 
   async create(createTankDto: CreateTankDto) {
@@ -23,7 +25,7 @@ export class TankService {
     }
 
     try {
-      return await this.prismaService.tank.create({
+      const tank = await this.prismaService.tank.create({
         data: {
           number_tank: createTankDto.number_tank,
           request_type: createTankDto.request_type,
@@ -35,6 +37,11 @@ export class TankService {
           external_id: createTankDto.external_id,
         }
       });
+
+      await this.systemMetricsService.incrementTanks(createTankDto.status);
+
+      return tank;
+
     } catch (error) {
       this.customError(error);
     }
@@ -149,7 +156,7 @@ export class TankService {
     }
 
     try {
-      return await this.prismaService.tank.update({
+      const tank = await this.prismaService.tank.update({
         where: {
           id: id
         },
@@ -158,6 +165,11 @@ export class TankService {
           returnedAt: new Date()
         }
       });
+
+      await this.systemMetricsService.decrementTanks(tank.status);
+
+      return tank;
+
     } catch (error) {
       this.customError(error);
     }
