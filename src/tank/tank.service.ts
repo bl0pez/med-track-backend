@@ -111,7 +111,10 @@ export class TankService {
         ],
         AND: [
           { number_tank: { contains: tankSearchDto?.search, mode: 'insensitive' } },
-        ]
+        ],
+      },
+      orderBy: {
+        status: 'asc'
       }
     });
 
