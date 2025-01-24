@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateTankDto } from './dto/create-tank.dto';
 import { UpdateTankDto } from './dto/update-tank.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,18 +14,18 @@ import { SystemMetricsService } from 'src/system-metrics/system-metrics.service'
 
 @Injectable()
 export class TankService {
-
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly systemMetricsService: SystemMetricsService
+    private readonly systemMetricsService: SystemMetricsService,
   ) {}
 
   async create(createTankDto: CreateTankDto) {
-
     const { external_id, patient_id, service_id } = createTankDto;
 
     if (!external_id && !patient_id && !service_id) {
-      throw new BadRequestException("Se debe especificar un paciente, servicio o id externo");
+      throw new BadRequestException(
+        'Se debe especificar un paciente, servicio o id externo',
+      );
     }
 
     try {
@@ -35,37 +39,44 @@ export class TankService {
           patient_id: createTankDto.patient_id,
           service_id: createTankDto.service_id,
           external_id: createTankDto.external_id,
-        }
+        },
       });
 
       await this.systemMetricsService.incrementTanks(createTankDto.status);
 
       return tank;
-
     } catch (error) {
       this.customError(error);
     }
-    
   }
 
   async findAll(paginationDto: PaginationDto) {
-    
     const tanks = await this.prismaService.tank.findMany({
       take: paginationDto.limit,
       skip: paginationDto?.limit * (paginationDto?.page - 1) || 0,
       where: {
         AND: [
-          { number_tank: { contains: paginationDto?.search, mode: 'insensitive' } },
-        ]
-      }
+          {
+            number_tank: {
+              contains: paginationDto?.search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
     });
 
     const rowsPerPage = await this.prismaService.tank.count({
       where: {
         AND: [
-          { number_tank: { contains: paginationDto?.search, mode: 'insensitive' } },
-        ]
-      }
+          {
+            number_tank: {
+              contains: paginationDto?.search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
     });
 
     return {
@@ -74,37 +85,37 @@ export class TankService {
         page: paginationDto.page,
         rowsPerPage: paginationDto.limit,
         count: rowsPerPage,
-      })
+      }),
     };
-
   }
 
   async findOneByCode(code: string) {
     const tank = await this.prismaService.tank.findFirst({
       where: {
         number_tank: code,
-        capacity: TankCapacity.SIX_M2,
-        returnedAt: null
+        capacity: TankCapacity.SIX_M3,
+        returnedAt: null,
       },
       include: {
         patient: true,
-        service: true
-      }
+        service: true,
+      },
     });
 
     if (!tank) {
-      throw new BadRequestException("Tanque no encontrado");
+      throw new BadRequestException('Tanque no encontrado');
     }
 
     return tank;
-
   }
 
   async searchTanks(tankSearchDto: TankSearchDto) {
     const { patient_id, external_id, service_id } = tankSearchDto;
 
     if (!patient_id && !external_id && !service_id) {
-      throw new BadRequestException("Se debe especificar un paciente, servicio o id externo");
+      throw new BadRequestException(
+        'Se debe especificar un paciente, servicio o id externo',
+      );
     }
 
     const tanks = await this.prismaService.tank.findMany({
@@ -117,12 +128,17 @@ export class TankService {
           { service_id: service_id },
         ],
         AND: [
-          { number_tank: { contains: tankSearchDto?.search, mode: 'insensitive' } },
+          {
+            number_tank: {
+              contains: tankSearchDto?.search,
+              mode: 'insensitive',
+            },
+          },
         ],
       },
       orderBy: {
-        status: 'asc'
-      }
+        status: 'asc',
+      },
     });
 
     const totalRows = await this.prismaService.tank.count({
@@ -133,9 +149,14 @@ export class TankService {
           { service_id: service_id },
         ],
         AND: [
-          { number_tank: { contains: tankSearchDto?.search, mode: 'insensitive' } },
-        ]
-      }
+          {
+            number_tank: {
+              contains: tankSearchDto?.search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
     });
 
     return {
@@ -144,32 +165,31 @@ export class TankService {
         page: tankSearchDto.page,
         rowsPerPage: tankSearchDto.limit,
         count: totalRows,
-    })
-    }
+      }),
+    };
   }
 
   async close(id: number) {
     const tank = await this.findOneById(id);
 
     if (tank.status === $Enums.TankStatus.RETURNED) {
-      throw new BadRequestException("Tanque ya ha sido devuelto");
+      throw new BadRequestException('Tanque ya ha sido devuelto');
     }
 
     try {
       const tank = await this.prismaService.tank.update({
         where: {
-          id: id
+          id: id,
         },
         data: {
           status: $Enums.TankStatus.RETURNED,
-          returnedAt: new Date()
-        }
+          returnedAt: new Date(),
+        },
       });
 
       await this.systemMetricsService.decrementTanks(tank.status);
 
       return tank;
-
     } catch (error) {
       this.customError(error);
     }
@@ -178,12 +198,12 @@ export class TankService {
   async findOneById(id: number) {
     const tank = await this.prismaService.tank.findFirst({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
 
     if (!tank) {
-      throw new BadRequestException("Tanque no encontrado");
+      throw new BadRequestException('Tanque no encontrado');
     }
 
     return tank;
@@ -199,18 +219,17 @@ export class TankService {
 
   private customError(error: Error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2003") {
-        
-        if (error.message.includes("patient_id")) {
-          throw new BadRequestException("Paciente no encontrado");
+      if (error.code === 'P2003') {
+        if (error.message.includes('patient_id')) {
+          throw new BadRequestException('Paciente no encontrado');
         }
 
-        if (error.message.includes("service_id")) {
-          throw new BadRequestException("Servicio no encontrado");
+        if (error.message.includes('service_id')) {
+          throw new BadRequestException('Servicio no encontrado');
         }
 
-        if (error.message.includes("request_type")) {
-          throw new BadRequestException("Tipo de solicitud no encontrado");
+        if (error.message.includes('request_type')) {
+          throw new BadRequestException('Tipo de solicitud no encontrado');
         }
       }
     }

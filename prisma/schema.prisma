@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,10 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enumeraciones
 enum Role {
   ADMIN
   USER
   MAINTENANCE
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TankCapacity {
+  THREE_M3
+  SIX_M3
+  TEN_M3
+}
+
+enum TankStatus {
+  DELIVERED
+  RETURNED
+  RECHARGE
+}
+
+enum RequestType {
+  PATIENT
+  SERVICE
+  EXTERNAL
 }
 
 model User {
@@ -26,12 +44,9 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  roles     Role[] @default([USER])
-}
-
-enum PatientStatus {
-  ACTIVE
-  INACTIVE
+  roles     Role[]   @default([USER])
+  tanksDelivered Tank[] @relation("TanksDelivered")
+  tanksReceived  Tank[] @relation("TanksReceived")
 }
 
 model Patient {
@@ -47,74 +62,56 @@ model Patient {
 model Service {
   id        Int      @id @default(autoincrement())
   name      String
+  tanks     Tank[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tanks     Tank[]
 }
 
 model External {
   id        Int      @id @default(autoincrement())
   name      String
+  tanks     Tank[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Tank      Tank[]
-}
-
-enum TankCapacity {
-  SIX_M2
-  TEN_M2
-  THREE_M3
-}
-
-enum TankStatus {
-  DELIVERED
-  RETURNED
-  RECHARGE
-}
-
-enum RequestType {
-  PATIENT
-  SERVICE
-  EXTERNAL
-}
-
-model SystemMetrics {
-  id       Int      @id @default(autoincrement())
-
-  total_patients_active Int @default(0)
-  total_patients_inactive Int @default(0)
-
-  total_tanks_delivered Int @default(0)
-  total_tanks_returned Int @default(0)
-  total_tanks_recharge Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
 }
 
 model Tank {
-  id          Int          @id @default(autoincrement())
-  number_tank String
-  request_type RequestType
-  capacity    TankCapacity
-  status      TankStatus
-  patient_id   Int?
-  service_id   Int?
-  external_id  Int?
-
-  deliveredAt DateTime
-  returnedAt  DateTime?
-
-  patient  Patient?  @relation(fields: [patient_id], references: [id])
-  service  Service?  @relation(fields: [service_id], references: [id])
-  external External? @relation(fields: [external_id], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                Int          @id @default(autoincrement())
+  number_tank       String
+  request_type      RequestType
+  capacity          TankCapacity
+  status            TankStatus
+  patient_id        Int?
+  service_id        Int?
+  external_id       Int?
+  delivered_by_id   Int?
+  received_by_id    Int?
+  deliveredAt       DateTime
+  returnedAt        DateTime?
+  patient           Patient?     @relation(fields: [patient_id], references: [id])
+  service           Service?     @relation(fields: [service_id], references: [id])
+  external          External?    @relation(fields: [external_id], references: [id])
+  deliveredBy       User?        @relation("TanksDelivered", fields: [delivered_by_id], references: [id])
+  receivedBy        User?        @relation("TanksReceived", fields: [received_by_id], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@index([patient_id], name: "patient_id")
   @@index([service_id], name: "service_id")
   @@index([external_id], name: "external_id")
   @@index([number_tank], name: "number_tank")
+  @@index([status], name: "status_index")
+  @@index([returnedAt], name: "returnedAt_index")
+  @@index([status, id], name: "status_id_index")
+}
+
+model SystemMetrics {
+  id                     Int      @id @default(autoincrement())
+  total_patients_active  Int      @default(0)
+  total_patients_inactive Int     @default(0)
+  total_tanks_delivered  Int      @default(0)
+  total_tanks_returned   Int      @default(0)
+  total_tanks_recharge   Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
