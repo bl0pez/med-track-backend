@@ -6,7 +6,7 @@ import {
 import { CreateTankDto } from './dto/create-tank.dto';
 import { UpdateTankDto } from './dto/update-tank.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { $Enums, Prisma, TankCapacity } from '@prisma/client';
+import { $Enums, Prisma, TankCapacity, TankStatus } from '@prisma/client';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { createPagination } from 'src/helpers/createPagination';
 import { TankSearchDto } from './dto/tank-search.dto';
@@ -187,7 +187,8 @@ export class TankService {
         },
       });
 
-      await this.systemMetricsService.decrementTanks(tank.status);
+      await this.systemMetricsService.incrementTanks(TankStatus.RETURNED);
+      await this.systemMetricsService.decrementTanks(TankStatus.DELIVERED);
 
       return tank;
     } catch (error) {
