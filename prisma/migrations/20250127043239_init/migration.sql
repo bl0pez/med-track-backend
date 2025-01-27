@@ -13,6 +13,15 @@ CREATE TYPE "Role" AS ENUM ('ADMIN', 'OPERATOR', 'CUSTOMER');
 -- CreateEnum
 CREATE TYPE "PatientStatus" AS ENUM ('ACTIVE', 'INACTIVE');
 
+-- CreateEnum
+CREATE TYPE "TankCapacity" AS ENUM ('THREE_M3', 'SIX_M3', 'TEN_M3');
+
+-- CreateEnum
+CREATE TYPE "TankStatus" AS ENUM ('DELIVERED', 'RETURNED', 'RECHARGE');
+
+-- CreateEnum
+CREATE TYPE "RequestType" AS ENUM ('PATIENT', 'SERVICE', 'EXTERNAL');
+
 -- CreateTable
 CREATE TABLE "Metrics" (
     "id" SERIAL NOT NULL,
