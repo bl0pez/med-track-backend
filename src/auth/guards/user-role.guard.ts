@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { META_ROLES } from '../decorators/role-protected.decorator';
-import { Role } from 'src/interfaces';
+import { Role } from '@prisma/client';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
@@ -31,15 +32,15 @@ export class UserRoleGuard implements CanActivate {
     }
 
     const req = context.switchToHttp().getRequest();
-    const user = req.user;
+    const user: User = req.user;
 
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    if (!validRoles.includes(user.roles)) {
+    if (!user.roles.some((role) => validRoles.includes(role))) {
       throw new ForbiddenException(
-        `User with role ${user.roles} is not allowed to access this resource`,
+        `User with roles ${user.roles} is not allowed to access this resource`,
       );
     }
 

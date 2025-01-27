@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// TankTrace Prisma Schema
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +9,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CylinderCapacity {
+  SIX_M3    // 6m³ cylinders
+  THREE_M3  // 3m³ cylinders
+  TEN_M3    // 10m³ cylinders
+}
+
+enum CylinderStatus {
+  IN_STOCK    // Cylinder is in the central stock
+  DELIVERED   // Cylinder has been delivered
+  RETURNED    // Cylinder has been returned to the central
+}
+
+enum TransactionAction {
+  DELIVERY    // Action: delivery of a cylinder
+  RETURN      // Action: return of a cylinder
+  RECHARGE    // Action: recharge of a 3m³ cylinder
+}
+
 enum Role {
   ADMIN
-  USER
-  MAINTENANCE
+  OPERATOR
+  CUSTOMER
+}
+
+model Metrics {
+  id                  Int      @id @default(autoincrement())
+  date                DateTime @default(now())    // Fecha de la métrica
+  cylindersInStock    Int      @default(0)        // Cantidad de cilindros en stock
+  cylindersDelivered  Int      @default(0)        // Cantidad de cilindros entregados
+  cylindersReturned   Int      @default(0)        // Cantidad de cilindros devueltos
+  deliveriesCount     Int      @default(0)        // Número total de entregas
+  returnsCount        Int      @default(0)        // Número total de devoluciones
+  rechargesCount      Int      @default(0)        // Número total de recargas
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  roles     Role[] @default([USER])
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  name        String
+  password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  roles       Role[]
+
+  // Relaciones
+  deliveredTransactions CylinderTransaction[] @relation("DeliveredBy")
+  receivedTransactions  CylinderTransaction[] @relation("ReceivedBy")
+
+  createdPatients       Patient[] @relation("PatientCreatedBy")
+  closedPatients        Patient[] @relation("PatientClosedBy")
+
+  createdServices       Service[] @relation("ServiceCreatedBy")
+  closedServices        Service[] @relation("ServiceClosedBy")
+
+  createdExternals      External[] @relation("ExternalCreatedBy")
+  closedExternals       External[] @relation("ExternalClosedBy")
+
+  createdSamus          Samu[] @relation("SamuCreatedBy")
+  closedSamus           Samu[] @relation("SamuClosedBy")
 }
 
 enum PatientStatus {
@@ -35,86 +78,93 @@ enum PatientStatus {
 }
 
 model Patient {
-  id        Int           @id @default(autoincrement())
-  name      String
-  rut       String
-  status    PatientStatus
-  tanks     Tank[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String
+  rut         String   @unique
+  status      PatientStatus   @default(ACTIVE)
+  createdBy   Int      // Usuario que creó al paciente
+  closedBy    Int?     // Usuario que cerró al paciente (opcional)
+  closedAt    DateTime? // Fecha de cierre (opcional)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  transactions CylinderTransaction[]
+
+  createdUser User     @relation("PatientCreatedBy", fields: [createdBy], references: [id])
+  closedUser  User?    @relation("PatientClosedBy", fields: [closedBy], references: [id])
 }
 
 model Service {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tanks     Tank[]
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdBy   Int      // Usuario que creó el servicio
+  closedBy    Int?     // Usuario que cerró el servicio (opcional)
+  closedAt    DateTime? // Fecha de cierre (opcional)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  transactions CylinderTransaction[]
+
+  createdUser User     @relation("ServiceCreatedBy", fields: [createdBy], references: [id])
+  closedUser  User?    @relation("ServiceClosedBy", fields: [closedBy], references: [id])
 }
 
 model External {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Tank      Tank[]
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdBy   Int      // Usuario que creó la entidad externa
+  closedBy    Int?     // Usuario que cerró la entidad externa (opcional)
+  closedAt    DateTime? // Fecha de cierre (opcional)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  transactions CylinderTransaction[]
+
+  createdUser User     @relation("ExternalCreatedBy", fields: [createdBy], references: [id])
+  closedUser  User?    @relation("ExternalClosedBy", fields: [closedBy], references: [id])
 }
 
-enum TankCapacity {
-  SIX_M2
-  TEN_M2
-  THREE_M3
+model Samu {
+  id             Int      @id @default(autoincrement())
+  ambulanceNumber String   // Número de la ambulancia que recargó cilindros
+  rechargeDate    DateTime @default(now())        // Fecha de la recarga
+  createdBy       Int      // Usuario que creó la entrada
+  closedBy        Int?     // Usuario que cerró la entrada (opcional)
+  closedAt        DateTime? // Fecha de cierre (opcional)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+  transactions    CylinderTransaction[]           // Relación con las transacciones
+
+  createdUser User     @relation("SamuCreatedBy", fields: [createdBy], references: [id])
+  closedUser  User?    @relation("SamuClosedBy", fields: [closedBy], references: [id])
 }
 
-enum TankStatus {
-  DELIVERED
-  RETURNED
-  RECHARGE
+model Cylinder {
+  id             Int          @id @default(autoincrement())
+  serialNumber   String       @unique           // Unique identifier (barcode or serial number)
+  capacity       CylinderCapacity               // Cylinder capacity (6m³, 3m³, or 10m³)
+  status         CylinderStatus                 // Current status of the cylinder
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  transactions   CylinderTransaction[]          // Relation to cylinder transactions
 }
 
-enum RequestType {
-  PATIENT
-  SERVICE
-  EXTERNAL
-}
+model CylinderTransaction {
+  id             Int              @id @default(autoincrement())
+  cylinderId     Int              // Cylinder involved in the transaction
+  deliveredBy    Int              // User who delivered the cylinder
+  receivedBy     Int?             // User who received the cylinder (optional)
+  patientId      Int?             // Relation to a patient (optional)
+  serviceId      Int?             // Relation to a service (optional)
+  externalId     Int?             // Relation to an external entity (optional)
+  samuId         Int?             // Relation to Samu (ambulance recharges)
+  action         TransactionAction // Action performed (DELIVERY, RETURN, RECHARGE)
+  deliveredAt    DateTime          // Date and time the cylinder was delivered
+  returnedAt     DateTime?         // Date and time the cylinder was returned (optional)
+  performedAt    DateTime @default(now())       // Date the transaction was performed
 
-model SystemMetrics {
-  id       Int      @id @default(autoincrement())
-
-  total_patients_active Int @default(0)
-  total_patients_inactive Int @default(0)
-
-  total_tanks_delivered Int @default(0)
-  total_tanks_returned Int @default(0)
-  total_tanks_recharge Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-}
-
-model Tank {
-  id          Int          @id @default(autoincrement())
-  number_tank String
-  request_type RequestType
-  capacity    TankCapacity
-  status      TankStatus
-  patient_id   Int?
-  service_id   Int?
-  external_id  Int?
-
-  deliveredAt DateTime
-  returnedAt  DateTime?
-
-  patient  Patient?  @relation(fields: [patient_id], references: [id])
-  service  Service?  @relation(fields: [service_id], references: [id])
-  external External? @relation(fields: [external_id], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([patient_id], name: "patient_id")
-  @@index([service_id], name: "service_id")
-  @@index([external_id], name: "external_id")
-  @@index([number_tank], name: "number_tank")
+  cylinder       Cylinder         @relation(fields: [cylinderId], references: [id])
+  deliveredUser  User             @relation("DeliveredBy", fields: [deliveredBy], references: [id])
+  receivedUser   User?            @relation("ReceivedBy", fields: [receivedBy], references: [id])
+  patient        Patient?         @relation(fields: [patientId], references: [id])
+  service        Service?         @relation(fields: [serviceId], references: [id])
+  external       External?        @relation(fields: [externalId], references: [id])
+  samu           Samu?            @relation(fields: [samuId], references: [id])
 }

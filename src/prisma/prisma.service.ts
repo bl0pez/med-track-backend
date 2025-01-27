@@ -25,7 +25,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
           email: 'test@gmail.com',
           password: this.hasher.hash('123456'),
           name: 'test',
-          roles: [Role.MAINTENANCE],
+          roles: [Role.OPERATOR],
         },
         {
           email: 'admin@gmail.com',
@@ -37,7 +37,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
           email: 'user@gmail.com',
           password: this.hasher.hash('123456'),
           name: 'user',
-          roles: [Role.USER],
+          roles: [Role.CUSTOMER],
         },
       ];
 
@@ -47,16 +47,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
       this.logger.log('Created default users');
     }
-
-    const systemMetrics = await this.systemMetrics.findMany();
-
-    if (!systemMetrics.length) {
-      await this.systemMetrics.create({
-        data: {}
-      });
-
-      this.logger.log('Created default system metrics');
-    }
-
   }
 }

@@ -1,4 +1,7 @@
-import { PickType } from "@nestjs/mapped-types";
-import { Patient } from "../entities/patient.entity";
+import { PickType } from '@nestjs/mapped-types';
+import { PatientEntity } from '../entities/patient.entity';
 
-export class CreatePatientDto extends PickType(Patient, ['name', 'rut'] as const) {}
+export class CreatePatientDto extends PickType(PatientEntity, [
+  'name',
+  'rut',
+] as const) {}

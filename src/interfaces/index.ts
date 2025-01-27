@@ -1,11 +1,16 @@
+export enum TimeFilter {
+  DAY = 'day',
+  MONTH = 'month',
+}
+
 export interface JwtPayload {
   id: number;
 }
 
 export enum Role {
-  ADMIN,
-  USER,
-  MAINTENANCE,
+  ADMIN = 'ADMIN',
+  OPERATOR = 'OPERATOR',
+  CUSTOMER = 'CUSTOMER',
 }
 
 export interface Hasher {
