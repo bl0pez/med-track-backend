@@ -60,7 +60,7 @@ export class PatientService {
     });
 
     return {
-      data: patients,
+      patients: patients,
       metadata: createPagination({
         page: paginationDto.page,
         rowsPerPage: paginationDto.limit,
