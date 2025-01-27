@@ -46,6 +46,29 @@ model Metrics {
   updatedAt           DateTime @updatedAt
 }
 
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TankCapacity {
+  THREE_M3
+  SIX_M3
+  TEN_M3
+}
+
+enum TankStatus {
+  DELIVERED
+  RETURNED
+  RECHARGE
+}
+
+enum RequestType {
+  PATIENT
+  SERVICE
+  EXTERNAL
+}
+
 model User {
   id          Int      @id @default(autoincrement())
   email       String   @unique
@@ -70,11 +93,6 @@ model User {
 
   createdSamus          Samu[] @relation("SamuCreatedBy")
   closedSamus           Samu[] @relation("SamuClosedBy")
-}
-
-enum PatientStatus {
-  ACTIVE
-  INACTIVE
 }
 
 model Patient {
