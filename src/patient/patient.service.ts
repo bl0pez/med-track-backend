@@ -25,19 +25,18 @@ export class PatientService {
 
   async findAll(paginationDto: PaginationDto) {
     const isPagination = paginationDto.page && paginationDto.limit;
-    const patientId = isNaN(Number(paginationDto?.search))
-      ? undefined
-      : Number(paginationDto.search);
+    const isNumber = !isNaN(Number(paginationDto.search));
 
     const patients = await this.prismaService.patient.findMany({
       skip: isPagination && (paginationDto.page - 1) * paginationDto.limit,
       take: isPagination && paginationDto.limit,
       where: {
-        AND: [
-          { id: patientId },
-          { name: { contains: paginationDto?.search, mode: 'insensitive' } },
-          { rut: { contains: paginationDto?.search, mode: 'insensitive' } },
-        ],
+        AND: {
+          OR: [
+            { id: isNumber ? Number(paginationDto.search) : undefined },
+            { name: { contains: paginationDto?.search, mode: 'insensitive' } },
+          ],
+        },
       },
       include: {
         createdUser: {
@@ -51,11 +50,12 @@ export class PatientService {
 
     const count = await this.prismaService.patient.count({
       where: {
-        AND: [
-          { id: patientId },
-          { name: { contains: paginationDto?.search, mode: 'insensitive' } },
-          { rut: { contains: paginationDto?.search, mode: 'insensitive' } },
-        ],
+        AND: {
+          OR: [
+            { id: isNumber ? Number(paginationDto.search) : undefined },
+            { name: { contains: paginationDto?.search, mode: 'insensitive' } },
+          ],
+        },
       },
     });
 
