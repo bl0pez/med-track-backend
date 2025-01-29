@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { createPagination } from 'src/helpers/createPagination';
+import { FindOneByIdDto } from './dto/find-one-by-id.dto';
 
 @Injectable()
 export class PatientService {
@@ -68,5 +69,27 @@ export class PatientService {
         totalCount: count,
       }),
     };
+  }
+
+  async findOneById({ id }: FindOneByIdDto) {
+    const patient = await this.prismaService.patient.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        createdUser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!patient) {
+      throw new BadRequestException('Patient not found');
+    }
+
+    return patient;
   }
 }
