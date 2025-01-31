@@ -5,9 +5,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { PatientModule } from './patient/patient.module';
 import { CylindersModule } from './cylinders/cylinders.module';
+import { CylinderTransactionModule } from './cylinder-transaction/cylinder-transaction.module';
 
 @Module({
-  imports: [AuthModule, UserModule, PrismaModule, MetricsModule, PatientModule, CylindersModule],
+  imports: [AuthModule, UserModule, PrismaModule, MetricsModule, PatientModule, CylindersModule, CylinderTransactionModule],
   controllers: [],
   providers: [],
 })
