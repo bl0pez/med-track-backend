@@ -5,5 +5,6 @@ import { CylindersController } from './cylinders.controller';
 @Module({
   controllers: [CylindersController],
   providers: [CylindersService],
+  exports: [CylindersService],
 })
 export class CylindersModule {}

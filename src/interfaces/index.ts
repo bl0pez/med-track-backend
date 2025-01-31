@@ -1,3 +1,10 @@
+export enum RequestType {
+  AMBULANCE = 'AMBULANCE',
+  EXTERNAL = 'EXTERNAL',
+  SERVICE = 'SERVICE',
+  PATIENT = 'PATIENT',
+}
+
 export enum TimeFilter {
   DAY = 'day',
   MONTH = 'month',
