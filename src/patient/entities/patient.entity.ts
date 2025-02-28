@@ -1,8 +1,10 @@
-import { Patient, PatientStatus } from '@prisma/client';
+import { Patient } from '@prisma/client';
 import { IsString, Matches, MinLength } from 'class-validator';
 
 export class PatientEntity implements Patient {
-  status: PatientStatus;
+  createdById: number;
+  closedById: number;
+  isClosed: boolean;
   createdBy: number;
   closedBy: number;
   closedAt: Date;

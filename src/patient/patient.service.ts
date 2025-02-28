@@ -15,7 +15,7 @@ export class PatientService {
       data: {
         name: createPatientDto.name,
         rut: createPatientDto.rut,
-        createdUser: {
+        createdBy: {
           connect: {
             id: user.id,
           },
@@ -40,9 +40,13 @@ export class PatientService {
         },
       },
       include: {
-        createdUser: {
+        createdBy: {
           select: {
-            id: true,
+            name: true,
+          },
+        },
+        closedBy: {
+          select: {
             name: true,
           },
         },
@@ -77,9 +81,13 @@ export class PatientService {
         id,
       },
       include: {
-        createdUser: {
+        createdBy: {
           select: {
-            id: true,
+            name: true,
+          },
+        },
+        closedBy: {
+          select: {
             name: true,
           },
         },

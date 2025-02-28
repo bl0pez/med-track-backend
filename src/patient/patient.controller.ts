@@ -27,7 +27,6 @@ export class PatientController {
   @Get(':id')
   @Auth()
   findOneById(@Param() id: FindOneByIdDto) {
-    console.log(id);
     return this.patientService.findOneById(id);
   }
 }
