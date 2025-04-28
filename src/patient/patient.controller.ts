@@ -13,7 +13,7 @@ export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
   @Post()
-  @Auth(Role.OPERATOR)
+  @Auth(Role.OPERATOR, Role.ADMIN)
   create(@Body() createPatientDto: CreatePatientDto, @GetUser() user: User) {
     return this.patientService.create(createPatientDto, user);
   }

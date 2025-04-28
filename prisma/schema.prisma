@@ -15,6 +15,16 @@ enum Role {
   CUSTOMER
 }
 
+enum TankStatus {
+  DELIVERED
+  RETURNED
+}
+
+enum TankSize {
+  SIX_M3
+  TEN_M3
+}
+
 model User {
   id             Int       @id @default(autoincrement())
   email          String    @unique
@@ -23,14 +33,19 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   roles          Role[]    @default([CUSTOMER])
-  patients       Patient[] @relation("CreatedBy")
-  closedPatients Patient[] @relation("ClosedBy")
+
+  patients       Patient[]     @relation("CreatedBy")
+  closedPatients Patient[]     @relation("ClosedBy")
+  deliveredTanks OxygenTank[]  @relation("DeliveredTanks")
+  receivedTanks  OxygenTank[]  @relation("ReceivedTanks")
 }
 
 model Patient {
   id          Int       @id @default(autoincrement())
   rut         String    @unique
   name        String
+  address     String
+  phone       String
   createdBy   User      @relation("CreatedBy", fields: [createdById], references: [id])
   createdById Int
   closedBy    User?     @relation("ClosedBy", fields: [closedById], references: [id])
@@ -39,4 +54,24 @@ model Patient {
   closedAt    DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  oxygenTanks    OxygenTank[]  @relation("PatientOxygenTanks")
+}
+
+model OxygenTank {
+  id              Int          @id @default(autoincrement())
+  size            TankSize
+  status          TankStatus
+  deliveredAt     DateTime      @default(now())
+  returnedAt      DateTime?
+
+  // Relaciones
+  patient         Patient       @relation("PatientOxygenTanks", fields: [patientId], references: [id])
+  patientId       Int
+
+  deliveredBy     User          @relation("DeliveredTanks", fields: [deliveredById], references: [id])
+  deliveredById   Int
+
+  receivedBy      User?         @relation("ReceivedTanks", fields: [receivedById], references: [id])
+  receivedById    Int?
 }

@@ -11,10 +11,9 @@ export class PatientService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createPatientDto: CreatePatientDto, user: User) {
-    return this.prismaService.patient.create({
+    return await this.prismaService.patient.create({
       data: {
-        name: createPatientDto.name,
-        rut: createPatientDto.rut,
+        ...createPatientDto,
         createdBy: {
           connect: {
             id: user.id,

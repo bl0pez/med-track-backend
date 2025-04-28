@@ -6,13 +6,16 @@ interface Props {
 }
 
 export const createPagination = ({
-  page = 1,
+  page,
   rowsPerPage,
   count,
   totalCount,
 }: Props) => {
-  const totalPages = Math.ceil(count / rowsPerPage);
-  const totalFilteredPages = Math.ceil(totalCount / rowsPerPage);
+  const totalPages = Math.ceil(totalCount / rowsPerPage);
+  const totalFilteredPages = Math.ceil(count / rowsPerPage);
+
+  console.log(page, totalPages);
+  console.log(totalPages < page ? null : page + 1);
 
   return {
     totalPages: totalPages || 1,
@@ -21,7 +24,7 @@ export const createPagination = ({
     rowsPerPage,
     totalRows: count,
     totalItems: totalCount,
-    nextPage: totalPages > page + 1 ? page + 1 : totalPages - 1,
+    nextPage: totalPages <= page ? null : page + 1,
     prevPage: page > 1 ? page - 1 : null,
   };
 };

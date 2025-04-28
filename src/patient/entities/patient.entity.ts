@@ -1,7 +1,14 @@
 import { Patient } from '@prisma/client';
-import { IsString, Matches, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
 
 export class PatientEntity implements Patient {
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
   createdById: number;
   closedById: number;
   isClosed: boolean;
@@ -13,7 +20,9 @@ export class PatientEntity implements Patient {
   name: string;
   id: number;
   @IsString()
-  @Matches(/^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9Kk]$/) // 12.345.678-9
+  @Matches(/^\d{1,8}-[\dkK]$/, {
+    message: 'Formato de RUT inválido (XXXXXXX-X)',
+  })
   rut: string;
   createdAt: Date;
   updatedAt: Date;
