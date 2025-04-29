@@ -20,6 +20,16 @@ export enum Role {
   CUSTOMER = 'CUSTOMER',
 }
 
+export enum TankSize {
+  SIX_M3 = 'SIX_M3',
+  TEN_M3 = 'TEN_M3',
+}
+
+export enum TankStatus {
+  DELIVERED = 'DELIVERED',
+  RETURNeD = 'RETURNED',
+}
+
 export interface Hasher {
   hash(data: string, saltRounds?: number): string;
   compare(data: string, encrypted: string): Promise<boolean>;

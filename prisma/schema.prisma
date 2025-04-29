@@ -62,6 +62,8 @@ model OxygenTank {
   id              Int          @id @default(autoincrement())
   size            TankSize
   status          TankStatus
+  serialNumber    String
+
   deliveredAt     DateTime      @default(now())
   returnedAt      DateTime?
 

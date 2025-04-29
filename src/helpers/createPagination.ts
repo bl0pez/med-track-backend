@@ -14,9 +14,6 @@ export const createPagination = ({
   const totalPages = Math.ceil(totalCount / rowsPerPage);
   const totalFilteredPages = Math.ceil(count / rowsPerPage);
 
-  console.log(page, totalPages);
-  console.log(totalPages < page ? null : page + 1);
-
   return {
     totalPages: totalPages || 1,
     totalFilteredPages: totalFilteredPages || 1,
