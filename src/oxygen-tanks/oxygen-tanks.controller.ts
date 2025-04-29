@@ -19,6 +19,12 @@ export class OxygenTanksController {
     return this.oxygenTanksService.create(createOxygenTankDto, userId);
   }
 
+  @Get('serial-number/:serialNumber')
+  @Auth(Role.ADMIN, Role.OPERATOR)
+  findBySerialNumber(@Param('serialNumber') serialNumber: string) {
+    return this.oxygenTanksService.findBySerialNumber(serialNumber);
+  }
+
   @Get(':patientId')
   @Auth(Role.ADMIN, Role.OPERATOR)
   findAllByPatientId(

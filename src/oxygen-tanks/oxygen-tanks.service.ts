@@ -70,4 +70,23 @@ export class OxygenTanksService {
       },
     });
   }
+
+  async findBySerialNumber(serialNumber: string) {
+    const oxygenTank = await this.prismaService.oxygenTank.findFirst({
+      where: {
+        serialNumber,
+        status: 'DELIVERED',
+      },
+    });
+
+    if (!oxygenTank) {
+      return {
+        oxygenTank: null,
+      };
+    }
+
+    return {
+      oxygenTank,
+    };
+  }
 }
