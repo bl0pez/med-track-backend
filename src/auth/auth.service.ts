@@ -2,16 +2,16 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Hasher, JwtPayload } from 'src/interfaces';
 import { BcryptPlugin } from 'src/plugins/bcrypt.plugin';
-import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/login.dto';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
   private hasher: Hasher;
 
   constructor(
-    private userService: UserService,
+    private userService: UsersService,
     private jwtService: JwtService,
   ) {
     this.hasher = new BcryptPlugin();

@@ -9,7 +9,7 @@ import {
 import { Observable } from 'rxjs';
 import { META_ROLES } from '../decorators/role-protected.decorator';
 import { Role } from '@prisma/client';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {

@@ -5,12 +5,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { envs } from 'src/config/envs';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { UserModule } from 'src/user/user.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Global()
 @Module({
   imports: [
-    UserModule,
+    UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,

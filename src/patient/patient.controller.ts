@@ -4,7 +4,7 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Role } from 'src/interfaces';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { FindOneByIdDto } from './dto/find-one-by-id.dto';
 

@@ -4,9 +4,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Hasher } from 'src/interfaces';
 import { BcryptPlugin } from 'src/plugins/bcrypt.plugin';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { createPagination } from 'src/helpers/createPagination';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   private hasher: Hasher;
 
   constructor(private readonly prismaService: PrismaService) {
@@ -32,15 +34,25 @@ export class UserService {
     });
   }
 
-  async findAll() {
-    const [users, total] = await Promise.all([
-      this.prismaService.user.findMany(),
-      this.prismaService.user.count(),
-    ]);
+  async findAll(paginationDto: PaginationDto) {
+    const isPagination = paginationDto.page && paginationDto.limit;
+    const isNumber = !isNaN(Number(paginationDto.search));
+
+    const users = await this.prismaService.user.findMany({
+      skip: isPagination && (paginationDto.page - 1) * paginationDto.limit,
+      take: isPagination && paginationDto.limit,
+    });
+
+    const count = await this.prismaService.user.count({});
 
     return {
-      users,
-      total,
+      data: users,
+      metadata: createPagination({
+        page: paginationDto.page,
+        rowsPerPage: paginationDto.limit,
+        count: users.length,
+        totalCount: count,
+      }),
     };
   }
 

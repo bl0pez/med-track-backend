@@ -1,22 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { UserService } from './user.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
+import { Role } from 'src/interfaces';
+import { UsersService } from './users.service';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-@Controller('user')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+@Controller('users')
+export class UsersController {
+  constructor(private readonly userService: UsersService) {}
 
   @Post()
-  @Auth()
+  @Auth(Role.ADMIN)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Auth(Role.ADMIN)
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.userService.findAll(paginationDto);
   }
 
   @Get(':id')
