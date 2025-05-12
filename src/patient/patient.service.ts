@@ -11,7 +11,6 @@ export class PatientService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createPatientDto: CreatePatientDto, user: User) {
-
     const isRutExists = await this.findOneByRut(createPatientDto.rut);
 
     if (isRutExists) {
