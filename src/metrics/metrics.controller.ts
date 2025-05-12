@@ -9,4 +9,9 @@ export class MetricsController {
   async getPatientsMetrics() {
     return this.metricsService.getPatientsMetrics();
   }
+
+  @Get('users')
+  async getUserMetrics() {
+    return this.metricsService.getUserMetrics();
+  }
 }

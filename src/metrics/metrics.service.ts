@@ -18,4 +18,19 @@ export class MetricsService {
       totalPatientsInactive: inactive,
     };
   }
+
+  async getUserMetrics() {
+    const [admin, users, operators] = await Promise.all([
+      this.prismaService.user.count({ where: { roles: { has: 'ADMIN' } } }),
+      this.prismaService.user.count({ where: { roles: { has: 'CUSTOMER' } } }),
+      this.prismaService.user.count({ where: { roles: { has: 'OPERATOR' } } }),
+    ]);
+
+    return {
+      totalUsers: admin + users + operators,
+      totalUsersAdmin: admin,
+      totalUsersCustomer: users,
+      totalUsersOperator: operators,
+    };
+  }
 }
