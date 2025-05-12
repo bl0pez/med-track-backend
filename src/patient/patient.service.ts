@@ -11,6 +11,13 @@ export class PatientService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createPatientDto: CreatePatientDto, user: User) {
+
+    const isRutExists = await this.findOneByRut(createPatientDto.rut);
+
+    if (isRutExists) {
+      throw new BadRequestException('El rut ya está registrado');
+    }
+
     return await this.prismaService.patient.create({
       data: {
         ...createPatientDto,
@@ -96,6 +103,16 @@ export class PatientService {
     if (!patient) {
       throw new BadRequestException('Patient not found');
     }
+
+    return patient;
+  }
+
+  async findOneByRut(rut: string) {
+    const patient = await this.prismaService.patient.findUnique({
+      where: {
+        rut,
+      },
+    });
 
     return patient;
   }

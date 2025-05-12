@@ -4,6 +4,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PatientModule } from './patient/patient.module';
 import { OxygenTanksModule } from './oxygen-tanks/oxygen-tanks.module';
 import { UsersModule } from './users/users.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
     PatientModule,
     OxygenTanksModule,
+    MetricsModule,
   ],
   controllers: [],
   providers: [],
