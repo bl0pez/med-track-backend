@@ -115,4 +115,30 @@ export class PatientService {
 
     return patient;
   }
+
+  async close(id: number, user: User) {
+    const patient = await this.prismaService.patient.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!patient) {
+      throw new BadRequestException('Patient not found');
+    }
+
+    return await this.prismaService.patient.update({
+      where: {
+        id,
+      },
+      data: {
+        isClosed: true,
+        closedBy: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+  }
 }

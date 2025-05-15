@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
@@ -22,6 +22,12 @@ export class PatientController {
   @Auth()
   findAll(@Query() paginationDto: PaginationDto) {
     return this.patientService.findAll(paginationDto);
+  }
+
+  @Put('close/:id')
+  @Auth(Role.OPERATOR, Role.ADMIN)
+  closePatient(@Param('id') id: string, @GetUser() user: User) {
+    return this.patientService.close(Number(id), user);
   }
 
   @Get(':id')
