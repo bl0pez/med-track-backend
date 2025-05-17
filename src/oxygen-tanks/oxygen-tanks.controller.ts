@@ -1,10 +1,19 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { OxygenTanksService } from './oxygen-tanks.service';
 import { CreateOxygenTankDto } from './dto/create-oxygen-tank.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Role } from 'src/interfaces';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('oxygen-tanks')
 export class OxygenTanksController {
@@ -32,5 +41,15 @@ export class OxygenTanksController {
     @Param('patientId') patientId: number,
   ) {
     return this.oxygenTanksService.findAllByPatientId(paginationDto, patientId);
+  }
+
+  @Patch('return/:id')
+  @Auth(Role.ADMIN, Role.OPERATOR)
+  close(
+    @Param('id') id: string,
+    @Body('serialNumber') serialNumber: string,
+    @GetUser() user: User,
+  ) {
+    return this.oxygenTanksService.returnTank(Number(id), serialNumber, user);
   }
 }

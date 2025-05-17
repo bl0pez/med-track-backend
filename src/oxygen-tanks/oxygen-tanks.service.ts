@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOxygenTankDto } from './dto/create-oxygen-tank.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { createPagination } from 'src/helpers/createPagination';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class OxygenTanksService {
@@ -110,11 +111,43 @@ export class OxygenTanksService {
     };
   }
 
+  async returnTank(id: number, serialNumber: string, user: User) {
+    const oxygenTank = await this.prismaService.oxygenTank.findFirst({
+      where: {
+        id,
+        serialNumber,
+        status: 'DELIVERED',
+      },
+    });
+
+    if (!oxygenTank) {
+      throw new BadRequestException(
+        `El tanque de oxígeno con el número de serie ${serialNumber} no existe o ya ha sido cerrado`,
+      );
+    }
+
+    return await this.prismaService.oxygenTank.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'RETURNED',
+        returnedAt: new Date(),
+        receivedById: user.id,
+      },
+    });
+  }
+
   private defaultCondition() {
     return {
-      orderBy: {
-        deliveredAt: 'desc' as const,
-      },
+      orderBy: [
+        {
+          returnedAt: 'desc' as const,
+        },
+        {
+          deliveredAt: 'desc' as const,
+        },
+      ],
       include: {
         receivedBy: {
           select: {
