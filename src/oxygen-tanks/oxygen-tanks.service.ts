@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOxygenTankDto } from './dto/create-oxygen-tank.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -10,7 +10,6 @@ export class OxygenTanksService {
 
   async findAllByPatientId(paginationDto: PaginationDto, patientId: number) {
     const isPagination = paginationDto.page && paginationDto.limit;
-    const isNumber = !isNaN(Number(paginationDto.search));
 
     const oxygenTanks = await this.prismaService.oxygenTank.findMany({
       skip: isPagination && (paginationDto.page - 1) * paginationDto.limit,
@@ -28,13 +27,21 @@ export class OxygenTanksService {
           ],
         },
       },
+      ...this.defaultCondition(),
     });
 
     const count = await this.prismaService.oxygenTank.count({
       where: {
         AND: {
           patientId: Number(patientId),
-          OR: [{ id: isNumber ? Number(paginationDto.search) : undefined }],
+          OR: [
+            {
+              serialNumber: {
+                contains: paginationDto?.search,
+                mode: 'insensitive',
+              },
+            },
+          ],
         },
       },
     });
@@ -51,6 +58,19 @@ export class OxygenTanksService {
   }
 
   async create(createOxygenTankDto: CreateOxygenTankDto, userId: number) {
+    const isSerialNumberExists = await this.prismaService.oxygenTank.findFirst({
+      where: {
+        serialNumber: createOxygenTankDto.serialNumber,
+        status: 'DELIVERED',
+      },
+    });
+
+    if (isSerialNumberExists) {
+      throw new BadRequestException(
+        `Ya existe un tanque de oxígeno con el número de serie ${createOxygenTankDto.serialNumber}, cierre el tanque antes de crear uno nuevo`,
+      );
+    }
+
     return await this.prismaService.oxygenTank.create({
       data: {
         serialNumber: createOxygenTankDto.serialNumber,
@@ -87,6 +107,26 @@ export class OxygenTanksService {
 
     return {
       oxygenTank,
+    };
+  }
+
+  private defaultCondition() {
+    return {
+      orderBy: {
+        deliveredAt: 'desc' as const,
+      },
+      include: {
+        receivedBy: {
+          select: {
+            name: true,
+          },
+        },
+        deliveredBy: {
+          select: {
+            name: true,
+          },
+        },
+      },
     };
   }
 }
