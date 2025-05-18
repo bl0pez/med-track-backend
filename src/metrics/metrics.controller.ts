@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Role } from 'src/interfaces';
@@ -6,6 +6,11 @@ import { Role } from 'src/interfaces';
 @Controller('metrics')
 export class MetricsController {
   constructor(private readonly metricsService: MetricsService) {}
+
+  @Get('oxygen-tanks/:year')
+  async getOxygenTankWithYear(@Param() { year }: { year: string }) {
+    return this.metricsService.getOxygenTankWithYear(Number(year));
+  }
 
   @Get('patients')
   @Auth()
