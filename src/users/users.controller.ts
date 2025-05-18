@@ -32,11 +32,13 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Auth(Role.ADMIN)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
   }
 
   @Patch(':id')
+  @Auth(Role.ADMIN)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }

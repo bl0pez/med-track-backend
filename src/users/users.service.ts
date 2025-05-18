@@ -36,7 +36,7 @@ export class UsersService {
 
   async findAll(paginationDto: PaginationDto) {
     const isPagination = paginationDto.page && paginationDto.limit;
-    const isNumber = !isNaN(Number(paginationDto.search));
+    // const isNumber = !isNaN(Number(paginationDto.search));
 
     const users = await this.prismaService.user.findMany({
       skip: isPagination && (paginationDto.page - 1) * paginationDto.limit,
@@ -61,7 +61,12 @@ export class UsersService {
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    return this.prismaService.user.update({
+      where: {
+        id: id,
+      },
+      data: updateUserDto,
+    });
   }
 
   remove(id: number) {
