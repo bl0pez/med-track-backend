@@ -56,6 +56,14 @@ export class PatientService {
           },
         },
       },
+      orderBy: [
+        {
+          closedAt: 'desc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ],
     });
 
     const count = await this.prismaService.patient.count({
