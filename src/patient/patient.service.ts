@@ -132,7 +132,24 @@ export class PatientService {
     });
 
     if (!patient) {
-      throw new BadRequestException('Patient not found');
+      throw new BadRequestException(`Paciente ${id} no encontrado`);
+    }
+
+    if (patient.isClosed) {
+      throw new BadRequestException('El paciente ya está cerrado');
+    }
+
+    const oxygenTanks = await this.prismaService.oxygenTank.count({
+      where: {
+        patientId: id,
+        status: 'DELIVERED',
+      },
+    });
+
+    if (oxygenTanks > 0) {
+      throw new BadRequestException(
+        `Debe devolver o cerrar todos los tanques de oxígeno asignados al paciente ${patient.name} antes de cerrar su registro.`,
+      );
     }
 
     return await this.prismaService.patient.update({
@@ -141,6 +158,7 @@ export class PatientService {
       },
       data: {
         isClosed: true,
+        closedAt: new Date(),
         closedBy: {
           connect: {
             id: user.id,
