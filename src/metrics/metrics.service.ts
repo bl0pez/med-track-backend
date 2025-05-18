@@ -33,4 +33,17 @@ export class MetricsService {
       totalUsersOperator: operators,
     };
   }
+
+  async getOxygenTanks() {
+    const [delivered, returned] = await Promise.all([
+      this.prismaService.oxygenTank.count({ where: { status: 'DELIVERED' } }),
+      this.prismaService.oxygenTank.count({ where: { status: 'RETURNED' } }),
+    ]);
+
+    return {
+      totalOxygenTanks: delivered + returned,
+      totalOxygenTanksDelivered: delivered,
+      totalOxygenTanksReturned: returned,
+    };
+  }
 }
