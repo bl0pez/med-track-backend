@@ -35,7 +35,7 @@ export class OxygenTanksController {
   }
 
   @Get(':patientId')
-  @Auth(Role.ADMIN, Role.OPERATOR)
+  @Auth(Role.ADMIN, Role.OPERATOR, Role.CUSTOMER)
   findAllByPatientId(
     @Query() paginationDto: PaginationDto,
     @Param('patientId') patientId: number,
