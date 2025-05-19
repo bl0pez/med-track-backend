@@ -59,6 +59,19 @@ export class OxygenTanksService {
   }
 
   async create(createOxygenTankDto: CreateOxygenTankDto, userId: number) {
+    const isActivePatient = await this.prismaService.patient.findFirst({
+      where: {
+        id: createOxygenTankDto.patientId,
+        isClosed: false,
+      },
+    });
+
+    if (!isActivePatient) {
+      throw new BadRequestException(
+        `No se puede agregar un tanque de oxígeno a un paciente cerrado`,
+      );
+    }
+
     const isSerialNumberExists = await this.prismaService.oxygenTank.findFirst({
       where: {
         serialNumber: createOxygenTankDto.serialNumber,
